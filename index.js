@@ -1,27 +1,61 @@
-const contacts = require('./contacts');
-const argv = require('yargs').argv;
+const chalk = require('chalk')
+const { Command } = require('commander')
+const {
+    listContacts,
+    addContact,
+    getContactById,
+    removeContact,
+} = require('./contacts')
 
-function invokeAction({ action, id, name, email, phone }) {
+const program = new Command()
+program
+    .requiredOption('-a, --action <type>', 'choose action')
+    .option('-i, --id <type>', 'user id')
+    .option('-n, --name <type>', 'user name')
+    .option('-e, --email <type>', 'user email')
+    .option('-p, --phone <type>', 'user phone')
+
+program.parse(process.argv)
+
+const argv = program.opts()
+
+const invokeAction = async ({ action, id, name, email, phone }) => {
     switch (action) {
         case 'list':
-            contacts.listContacts();
-            break;
+            const contacts = await listContacts()
+            console.table(contacts)
+            break
 
         case 'get':
-            contacts.getContactById(id);
-            break;
+            const contactById = await getContactById(id)
+            if (contactById) {
+                console.log(chalk.green('Contact found'))
+                console.log(contactById)
+                return
+            }
+            console.log(chalk.yellow('Contact not found'))
+
+            break
 
         case 'add':
-            contacts.addContact(name, email, phone);
-            break;
+            const contact = await addContact(name, email, phone)
+            console.log(chalk.green('Add new contact'))
+            console.log(contact)
+            break
 
-        case 'remove':
-            contacts.removeContact(id);
+        case "remove":
+            const removedContacts = await removeContact(id);
+            if (removedContacts) {
+                console.log(chalk.green('Contact deleted'))
+                console.log(removedContacts)
+                return
+            }
+            console.log(chalk.yellow('Contact not deleted'))
             break;
 
         default:
-            console.warn('\x1B[31m Unknown action type!');
+            console.warn(chalk.red('Unknown action type!'))
     }
 }
 
-invokeAction(argv);
+invokeAction(argv).then(() => console.log('Operation success'))
