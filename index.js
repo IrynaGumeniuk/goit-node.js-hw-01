@@ -1,4 +1,4 @@
-const chalk = require('chalk')
+const chalk = require('chalk');
 const { Command } = require('commander')
 const {
     listContacts,
@@ -39,14 +39,12 @@ const invokeAction = async ({ action, id, name, email, phone }) => {
 
         case 'add':
             const contact = await addContact(name, email, phone)
-            console.log(chalk.green('Add new contact'))
             console.log(contact)
             break
 
         case "remove":
             const removedContacts = await removeContact(id);
             if (removedContacts) {
-                console.log(chalk.green('Contact deleted'))
                 console.log(removedContacts)
                 return
             }
